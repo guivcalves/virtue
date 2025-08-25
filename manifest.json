@@ -1,0 +1,27 @@
+{
+  "name": "Virtue - Agência Digital",
+  "short_name": "Virtue",
+  "description": "Agência digital especializada em social media, criação de sites e tráfego pago",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#667eea",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://res.cloudinary.com/dgpmddse2/image/upload/v1753811436/Design_sem_nome_wvghzf.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://res.cloudinary.com/dgpmddse2/image/upload/v1753811436/Design_sem_nome_wvghzf.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "marketing", "design"],
+  "lang": "pt-BR",
+  "dir": "ltr"
+} 

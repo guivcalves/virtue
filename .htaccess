@@ -1,0 +1,161 @@
+# ===============================================
+# CONFIGURAÇÕES DE SEGURANÇA - VIRTUE
+# ===============================================
+
+# Força HTTPS
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Headers de Segurança
+<IfModule mod_headers.c>
+    # Content Security Policy
+    Header always set Content-Security-Policy "default-src 'self'; img-src 'self' https://res.cloudinary.com https://i.imgur.com data:; video-src 'self' https://res.cloudinary.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self'; connect-src 'self' https://api.whatsapp.com; frame-ancestors 'none';"
+    
+    # Proteção XSS
+    Header always set X-XSS-Protection "1; mode=block"
+    
+    # Previne MIME type sniffing
+    Header always set X-Content-Type-Options "nosniff"
+    
+    # Previne clickjacking
+    Header always set X-Frame-Options "DENY"
+    
+    # Controle de referrer
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    
+    # Força HTTPS por 1 ano
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    
+    # Remove informações do servidor
+    Header unset Server
+    Header unset X-Powered-By
+</IfModule>
+
+# ===============================================
+# OTIMIZAÇÕES DE PERFORMANCE
+# ===============================================
+
+# Compressão Gzip
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/xml
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE application/xhtml+xml
+    AddOutputFilterByType DEFLATE application/rss+xml
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/x-javascript
+    AddOutputFilterByType DEFLATE application/json
+</IfModule>
+
+# Cache de Arquivos Estáticos
+<IfModule mod_expires.c>
+    ExpiresActive on
+    
+    # Imagens
+    ExpiresByType image/jpg "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/gif "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/webp "access plus 1 month"
+    ExpiresByType image/svg+xml "access plus 1 month"
+    
+    # Vídeos
+    ExpiresByType video/mp4 "access plus 1 month"
+    ExpiresByType video/webm "access plus 1 month"
+    
+    # CSS e JavaScript
+    ExpiresByType text/css "access plus 1 week"
+    ExpiresByType application/javascript "access plus 1 week"
+    ExpiresByType application/x-javascript "access plus 1 week"
+    
+    # Fontes
+    ExpiresByType font/woff "access plus 1 month"
+    ExpiresByType font/woff2 "access plus 1 month"
+    ExpiresByType application/font-woff "access plus 1 month"
+    ExpiresByType application/font-woff2 "access plus 1 month"
+    
+    # HTML
+    ExpiresByType text/html "access plus 1 hour"
+</IfModule>
+
+# ===============================================
+# PROTEÇÕES CONTRA ATAQUES
+# ===============================================
+
+# Bloqueia acesso a arquivos sensíveis
+<FilesMatch "\.(htaccess|htpasswd|ini|log|sh|inc|bak|sql)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Bloqueia user agents maliciosos
+<IfModule mod_rewrite.c>
+    RewriteCond %{HTTP_USER_AGENT} (libwww-perl|wget|python|nikto|curl|scan|java|winhttp|clshttp|loader) [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} (%0A|%0D|%27|%3C|%3E|%00) [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} (;|<|>|'|"|\)|\(|%0A|%0D|%22|%27|%28|%3C|%3E|%00).*(libwww-perl|wget|python|nikto|curl|scan|java|winhttp|HTTrack|clshttp|archiver|loader|email|harvest|extract|grab|miner) [NC,OR]
+    RewriteCond %{THE_REQUEST} (\?|\*|%2a)+(%20+|\\s+|%20+\\s+|\\s+%20+|\\s+%20+\\s+)(http|https) [NC,OR]
+    RewriteRule .* - [F]
+</IfModule>
+
+# Previne hotlinking de imagens
+<IfModule mod_rewrite.c>
+    RewriteCond %{HTTP_REFERER} !^$
+    RewriteCond %{HTTP_REFERER} !^https?://(www\.)?seudominio\.com [NC]
+    RewriteRule \.(jpg|jpeg|png|gif|webp|svg)$ - [F]
+</IfModule>
+
+# Limita tamanho de upload (se necessário)
+LimitRequestBody 10485760
+
+# ===============================================
+# CONFIGURAÇÕES GERAIS
+# ===============================================
+
+# Página de erro personalizada (opcional)
+# ErrorDocument 404 /404.html
+# ErrorDocument 403 /403.html
+# ErrorDocument 500 /500.html
+
+# Desabilita listagem de diretórios
+Options -Indexes
+
+# Desabilita execução de PHP em uploads (se houver)
+<Directory "uploads">
+    php_flag engine off
+</Directory>
+
+# ===============================================
+# OTIMIZAÇÕES ESPECÍFICAS
+# ===============================================
+
+# Remove ETags (melhor cache)
+<IfModule mod_headers.c>
+    Header unset ETag
+</IfModule>
+FileETag None
+
+# Configuração para PWA (se implementar)
+<IfModule mod_mime.c>
+    AddType application/manifest+json .webmanifest
+    AddType application/x-web-app-manifest+json .webapp
+</IfModule>
+
+# ===============================================
+# MONITORAMENTO E LOGS
+# ===============================================
+
+# Log de erros personalizado (descomente se necessário)
+# ErrorLog logs/virtue_error.log
+# CustomLog logs/virtue_access.log combined
+
+# ===============================================
+# NOTAS IMPORTANTES
+# ===============================================
+# 1. Substitua "seudominio.com" pelo seu domínio real
+# 2. Teste todas as configurações em ambiente de desenvolvimento
+# 3. Alguns hosts podem não suportar todas as diretivas
+# 4. Monitore logs após implementação
+# 5. Mantenha backup antes de aplicar mudanças 
